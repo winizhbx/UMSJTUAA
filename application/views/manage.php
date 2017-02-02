@@ -84,7 +84,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							},
 							success: function(data)
 							{
-								alert('Success');
+								var innerhtml = '<div id="'+data+'" style="display:none">';
+								innerhtml += '<a data-toggle="collapse" href="#collapse'+data;
+								innerhtml += '" class="list-group-item list-group-item-action"><h5 class="list-group-item-heading">'+title;
+								innerhtml += '</h5></a><div id="collapse'+data;
+								innerhtml += '" class="panel-collapse collapse"><a href="/news/index/'+data;
+								innerhtml += '" type="button" class="btn btn-link">Read more</a><button type="button" class="btn btn-danger" name="'+data;
+								innerhtml += '" onclick="newsDelete('+data;
+								innerhtml += ')">delete</button></div></div>';
+
+								$("#newinsert").after(innerhtml);
+
+             					$("#"+data).slideDown();
+
 							},
 							error: function()
 							{
@@ -97,11 +109,37 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				K('button[name=clear]').click(function(e) {
 					editor.html('');
 				});
+
 			});
 
-
+			function newsDelete(id){
+				$.ajax
+			    ({
+					type: 'POST',
+					url: '/manage/delete',
+					data: 
+					{
+						id: id /////////
+					},
+					success: function(data)
+					{
+						$("#"+id).fadeTo("fast", 0.01, function(){ //fade
+             				$(this).slideUp("normal", function() { //slide up
+                 			$(this).remove(); //then remove from the DOM
+             			});
+         });
+					},
+					error: function()
+					{
+						alert('FAIL due to unknown error');
+					},
+					dataType: 'text'
+				});
+			    
+			}
 		</script>
 
+	
 
 </head>
 <body>	
@@ -135,7 +173,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</h3>
   </div>
   </div>
+<!-- News List -->
+<div class="row">
+	<div class="col-sm-12" align="center">
+		<h2>News List</h2>
+	</div>
+</div>
+<div class="list-group" id="news">
+	<div id="newinsert"></div>
+	<?php 
+	foreach ($news as $news_item)
+	{
+		echo '<div id="'.$news_item->id.'">';
+		echo '<a data-toggle="collapse" href="#collapse'.$news_item->id;
+		echo '" class="list-group-item list-group-item-action">';
+		echo '<h5 class="list-group-item-heading">'.$news_item->title.'</h5>';
+		echo '</a>';
+		
+		echo '<div id="collapse'.$news_item->id.'" class="panel-collapse collapse">';
+		
+		echo '<a href="/news/index/'.$news_item->id;
+		echo '" type="button" class="btn btn-link">';
+		echo 'Read more</a>';
 
+		echo '<button type="button" class="btn btn-danger" name="'.$news_item->id.'"';
+		echo ' onclick="newsDelete('.$news_item->id.')">';
+		echo 'delete</button>';
+    	echo '</div>';
+
+    	echo '</div>';
+
+	}
+	?>
+</div>
 
   <div class="row">
     <div class="col-sm-3">
